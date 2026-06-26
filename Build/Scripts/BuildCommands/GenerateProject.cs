@@ -21,7 +21,11 @@ public class GenerateProject : BuildCommand
 {
     private const string CsProjFileExtension = "csproj";
     private const string CsFileExtension = "cs";
+    private const string ShprojFileExtension = "shproj";
+    private const string ProjitemsFileExtension = "projitems";
     private const string CsprojTemplateName = "Csproj";
+    private const string ShprojTemplateName = "Shproj";
+    private const string ProjitemsTemplateName = "Projitems";
     private const string ModuleTemplateName = "Module";
     private const string SkipIncludeAnalyzersPropertyName = "SkipIncludeAnalyzers";
 
@@ -33,9 +37,24 @@ public class GenerateProject : BuildCommand
         bool ShouldGenerateSolution = ParseParam("GenerateSolution");
         bool RunUSharpProjectSetup = ParseParam("RunUSharpProjectSetup");
         bool EditorOnly = ParseParam("EditorOnly");
+        bool SharedProject = ParseParam("SharedProject");
         string[] Dependencies = ParseParamValues("Dependencies");
         string ProjectPath = Path.Combine(ProjectFolder, $"{ProjectName}.{CsProjFileExtension}");
         string[] CompileIncludeFolder = ParseParamValues("CompileIncludeFolder");
+
+        if (SharedProject)
+        {
+            WriteSharedProjectTemplates(ProjectName, ProjectFolder);
+            LoggerUtilities.LogUnrealSharpInfo($"Generated shared project '{ProjectName}' successfully.");
+
+            if (ShouldGenerateSolution)
+            {
+                CommandUtilities.RunCommand(nameof(GenerateUserSolution), this,
+                    new List<KeyValuePair<string, string>> { new("ForceGenerate", "true") });
+            }
+
+            return;
+        }
 
         WriteProjectTemplate(ProjectName, ProjectFolder);
 
@@ -73,6 +92,20 @@ public class GenerateProject : BuildCommand
         };
 
         TemplateUtilities.WriteTemplateToFile(this, CsprojTemplateName, projectName, CsProjFileExtension, projectFolder, TemplateValues);
+    }
+
+    private void WriteSharedProjectTemplates(string projectName, string projectFolder)
+    {
+        string SharedGuid = Guid.NewGuid().ToString("B").ToUpperInvariant();
+
+        Dictionary<string, string> TemplateValues = new Dictionary<string, string>
+        {
+            { "PROJECT_NAME", projectName },
+            { "PROJECT_GUID", SharedGuid }
+        };
+
+        TemplateUtilities.WriteTemplateToFile(this, ProjitemsTemplateName, projectName, ProjitemsFileExtension, projectFolder, TemplateValues);
+        TemplateUtilities.WriteTemplateToFile(this, ShprojTemplateName, projectName, ShprojFileExtension, projectFolder, TemplateValues);
     }
 
     private void WriteModuleTemplate(string projectName, string projectFolder)

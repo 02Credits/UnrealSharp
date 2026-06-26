@@ -15,7 +15,7 @@ void FUnrealSharpRuntimeGlueModule::StartupModule()
 {
 	FUnrealSharpEditorModule& UnrealSharpEditor = FUnrealSharpEditorModule::Get();
 	UnrealSharpEditor.OnBuildingToolbarEvent().AddStatic(&FUnrealSharpRuntimeGlueModule::OnBuildingToolbar);
-	UnrealSharpEditor.AddNewProject(GetRuntimeGlueName(), UnrealSharp::Paths::GetScriptFolderDirectory(), FPaths::ProjectDir(), {}, false);
+	UnrealSharpEditor.AddNewProject(GetRuntimeGlueName(), UnrealSharp::Paths::GetScriptFolderDirectory(), FPaths::ProjectDir(), {}, false, true);
 	
 	FModuleManager::Get().OnModulesChanged().AddRaw(this, &FUnrealSharpRuntimeGlueModule::OnModulesChanged);
 	

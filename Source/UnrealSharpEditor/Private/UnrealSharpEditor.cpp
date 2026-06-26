@@ -736,20 +736,26 @@ void FUnrealSharpEditorModule::OnProjectLoaded()
 	});
 }
 
-void FUnrealSharpEditorModule::AddNewProject(const FString& ModuleName, const FString& ProjectParentFolder, const FString& ProjectRoot, TMap<FString, FString> ActionArgs, bool bOpenProject)
+void FUnrealSharpEditorModule::AddNewProject(const FString& ModuleName, const FString& ProjectParentFolder, const FString& ProjectRoot, TMap<FString, FString> ActionArgs, bool bOpenProject, bool bSharedProject)
 {
 	FString ProjectFolder = FPaths::Combine(ProjectParentFolder, ModuleName);
-	FString CsProjPath = FPaths::Combine(ProjectFolder, ModuleName + ".csproj");
-	
+	const TCHAR* ProjectExtension = bSharedProject ? TEXT(".shproj") : TEXT(".csproj");
+	FString CsProjPath = FPaths::Combine(ProjectFolder, ModuleName + ProjectExtension);
+
 	if (FPaths::FileExists(CsProjPath))
 	{
 		return;
 	}
-	
+
 	ActionArgs.Add(TEXT("ProjectName"), ModuleName);
 	ActionArgs.Add(TEXT("ProjectFolder"), UnrealSharp::Paths::MakeQuotedPath(FPaths::ConvertRelativePathToFull(ProjectFolder)));
 	ActionArgs.Add(TEXT("GenerateSolution"), TEXT("true"));
 	ActionArgs.Add(TEXT("RunUSharpProjectSetup"), TEXT("true"));
+
+	if (bSharedProject)
+	{
+		ActionArgs.Add(TEXT("SharedProject"), TEXT("true"));
+	}
 	
 	IUATHelperModule::UatTaskResultCallack UATCallback = [this, ModuleName, CsProjPath, bOpenProject](FString ReturnCode, double)
 	{
