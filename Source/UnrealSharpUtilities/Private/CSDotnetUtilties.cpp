@@ -83,7 +83,46 @@ FString UnrealSharp::DotNetUtilities::GetDotNetDirectory()
 		break;
 	}
 
-	return DotNetPathFromEnv;
+    if (DotNetPathFromEnv.IsEmpty())
+    {
+        TArray<FString> Fallbacks;
+        Fallbacks.Add(FPlatformMisc::GetEnvironmentVariable(TEXT("DOTNET_ROOT")));
+#if defined(_WIN32)
+        Fallbacks.Add(FPlatformMisc::GetEnvironmentVariable(TEXT("ProgramW6432")) / TEXT("dotnet"));
+        Fallbacks.Add(FPlatformMisc::GetEnvironmentVariable(TEXT("ProgramFiles")) / TEXT("dotnet"));
+        Fallbacks.Add(TEXT("C:/Program Files/dotnet"));
+#else
+        Fallbacks.Add(TEXT("/usr/share/dotnet"));
+        Fallbacks.Add(TEXT("/usr/local/share/dotnet"));
+#endif
+
+        for (FString& Fallback : Fallbacks)
+        {
+            if (Fallback.IsEmpty() || !FPaths::DirectoryExists(Fallback))
+            {
+                continue;
+            }
+
+            // Callers concatenate onto this directly, so it has to keep a trailing separator.
+            if (!Fallback.EndsWith(TEXT("/")) && !Fallback.EndsWith(TEXT("\\")))
+            {
+                Fallback += TEXT("/");
+            }
+
+            UE_LOGFMT(LogUnrealSharpUtilities, Warning,
+                "No .NET SDK found on PATH, falling back to {0}. PATH was: {1}", Fallback, PathVariable);
+
+            DotNetPathFromEnv = Fallback;
+            break;
+        }
+    }
+
+    if (DotNetPathFromEnv.IsEmpty())
+    {
+        UE_LOGFMT(LogUnrealSharpUtilities, Warning, "Failed to locate a .NET SDK. PATH was: {0}", PathVariable);
+    }
+
+    return DotNetPathFromEnv;
 }
 
 FString UnrealSharp::DotNetUtilities::GetDotNetExecutablePath()
