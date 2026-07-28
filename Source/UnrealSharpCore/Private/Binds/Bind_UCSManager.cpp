@@ -18,6 +18,11 @@ DECLARE_UNREALSHARP_BINDER(Bind_UCSManager)
 		return WorldContext;
 	}
 
+	void SetCurrentWorldContext(UObject* WorldContext)
+	{
+		UCSManager::Get().SetCurrentWorldContext(WorldContext);
+	}
+
 	void* GetCurrentWorldPtr()
 	{
 		UObject* WorldContext = UCSManager::Get().GetCurrentWorldContext();
@@ -27,5 +32,6 @@ DECLARE_UNREALSHARP_BINDER(Bind_UCSManager)
 	BIND_UNREALSHARP_FUNCTION(FindManagedObject)
 	BIND_UNREALSHARP_FUNCTION(FindOrCreateManagedInterfaceWrapper)
 	BIND_UNREALSHARP_FUNCTION(GetCurrentWorldContext)
+	BIND_UNREALSHARP_FUNCTION(SetCurrentWorldContext)
 	BIND_UNREALSHARP_FUNCTION(GetCurrentWorldPtr)
 }
