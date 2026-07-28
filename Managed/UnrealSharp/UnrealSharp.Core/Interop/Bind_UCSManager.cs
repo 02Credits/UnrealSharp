@@ -8,6 +8,7 @@ public static unsafe partial class Bind_UCSManager
     public static delegate* unmanaged<IntPtr, IntPtr> FindManagedObject;
     public static delegate* unmanaged<IntPtr, IntPtr, IntPtr> FindOrCreateManagedInterfaceWrapper;
     public static delegate* unmanaged<IntPtr> GetCurrentWorldContext;
+    public static delegate* unmanaged<IntPtr, void> SetCurrentWorldContext;
     public static delegate* unmanaged<IntPtr> GetCurrentWorldPtr;
     
     public static UnrealSharpObject WorldContextObject
