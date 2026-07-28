@@ -319,6 +319,7 @@ public static class PropertyUtilities
 
         if (property.HasAllFlags(EPropertyFlags.NativeAccessSpecifierPublic) ||
             (property.HasAllFlags(EPropertyFlags.NativeAccessSpecifierPrivate) && property.HasMetaData("AllowPrivateAccess")) ||
+            (property.HasAllFlags(EPropertyFlags.NativeAccessSpecifierProtected) && property.HasMetaData("AllowPrivateAccess")) ||
             (!isClassOwner && property.HasAllFlags(EPropertyFlags.Protected)))
         {
             return ScriptGeneratorUtilities.PublicKeyword;
