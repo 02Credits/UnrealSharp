@@ -1,4 +1,5 @@
-﻿using UnrealSharp.Interop;
+﻿using UnrealSharp.Core.Interop;
+using UnrealSharp.Interop;
 using UnrealSharp.UnrealSharpCore;
 
 namespace UnrealSharp.Engine;
@@ -6,15 +7,52 @@ namespace UnrealSharp.Engine;
 public partial class UWorld
 {
     /// <summary>
+    /// Pins the ambient world context to this world for the duration of a call, restoring the previous one
+    /// on dispose.
+    /// </summary>
+    private readonly struct PinnedWorldContext : IDisposable
+    {
+        private readonly IntPtr _previousWorldContext;
+
+        public PinnedWorldContext(IntPtr worldContext)
+        {
+            _previousWorldContext = Bind_UCSManager.CallGetCurrentWorldContext();
+            Bind_UCSManager.CallSetCurrentWorldContext(worldContext);
+        }
+
+        public void Dispose()
+        {
+            Bind_UCSManager.CallSetCurrentWorldContext(_previousWorldContext);
+        }
+    }
+
+    /// <summary>
+    /// Makes world-context glue resolve against this world rather than the ambient context.
+    /// </summary>
+    private PinnedWorldContext PinWorldContext() => new PinnedWorldContext(NativeObject);
+
+    /// <summary>
     /// The URL that was used when loading this World.
     /// </summary>
-    public FURL URL => UCSWorldExtensions.WorldURL();
+    public FURL URL
+    {
+        get
+        {
+            using (PinWorldContext()) return UCSWorldExtensions.WorldURL();
+        }
+    }
 
     /// <summary>
     /// Get the game mode of this world.
     /// </summary>
     /// <returns>The game mode of this world.</returns>
-    public AGameModeBase GameMode => UGameplayStatics.GameMode;
+    public AGameModeBase GameMode
+    {
+        get
+        {
+            using (PinWorldContext()) return UGameplayStatics.GameMode;
+        }
+    }
     
     /// <summary>
     /// Get the game mode of this world as a specific type.
@@ -27,7 +65,13 @@ public partial class UWorld
     /// Get the game instance of this world.
     /// </summary>
     /// <returns>The game instance of this world.</returns>
-    public UGameInstance GameInstance => UGameplayStatics.GameInstance;
+    public UGameInstance GameInstance
+    {
+        get
+        {
+            using (PinWorldContext()) return UGameplayStatics.GameInstance;
+        }
+    }
     
     /// <summary>
     /// Get the game instance of this world as a specific type.
@@ -40,7 +84,13 @@ public partial class UWorld
     /// Get the game state of this world.
     /// </summary>
     /// <returns>The game state of this world.</returns>
-    public AGameStateBase GameState => UGameplayStatics.GameState;
+    public AGameStateBase GameState
+    {
+        get
+        {
+            using (PinWorldContext()) return UGameplayStatics.GameState;
+        }
+    }
     
     /// <summary>
     /// Get the game state of this world as a specific type.
@@ -57,7 +107,13 @@ public partial class UWorld
     /// <summary>
     /// Returns the type of this world
     /// </summary>
-    public ECSWorldType WorldType => UCSWorldExtensions.WorldType;
+    public ECSWorldType WorldType
+    {
+        get
+        {
+            using (PinWorldContext()) return UCSWorldExtensions.WorldType;
+        }
+    }
 
     /// <summary>
     /// Returns true if this world is a game world (Game, PIE, GamePreview, GameRPC)
@@ -119,7 +175,7 @@ public partial class UWorld
     /// <param name="bShouldSkipGameNotify">Whether to notify the clients/game or not</param>
     public void ServerTravel(string url, bool bAbsolute = false, bool bShouldSkipGameNotify = false)
 	{
-		UCSWorldExtensions.ServerTravel(url, bAbsolute, bShouldSkipGameNotify);
+		using (PinWorldContext()) UCSWorldExtensions.ServerTravel(url, bAbsolute, bShouldSkipGameNotify);
 	}
     
 	/// <summary>
@@ -141,6 +197,6 @@ public partial class UWorld
 	/// <param name="isAbsolute">If true, URL is absolute; otherwise, it is relative.</param>
     public void SeamlessTravel(string url, bool isAbsolute = false)
 	{
-		UCSWorldExtensions.SeamlessTravel(url, isAbsolute);
+		using (PinWorldContext()) UCSWorldExtensions.SeamlessTravel(url, isAbsolute);
 	}
 }
