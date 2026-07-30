@@ -681,7 +681,7 @@ public partial class UObject
 
 public static class UObjectExtensions
 {
-    public static bool IsValid(this UObject? obj)
+    public static bool IsValid([NotNullWhen(true)] this UObject? obj)
     {
         return obj != null && !obj.IsDestroyed;
     }
