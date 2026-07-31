@@ -98,10 +98,23 @@ public class SimpleTypePropertyTranslator : PropertyTranslator
 	    }
 
 		string foundCSharpType = translator.GetManagedType(paramProperty);
+
+		bool isFlatInitializerList = !fieldInitializerList.Contains('(')
+		                             && fieldInitializers.Count <= structProperty.ScriptStruct.Children.Count;
+
+		if (!isFlatInitializerList)
+		{
+			ConsoleUtilities.Log($"Cannot represent default value '{cppDefaultValue}' for parameter " +
+			                     $"'{paramProperty.SourceName}' of struct '{structName}'; " +
+			                     "defaulting the parameter instead.");
+			builder.AppendLine($"{foundCSharpType} {variableName} = new {foundCSharpType}();");
+			return;
+		}
+
 		builder.AppendLine($"{foundCSharpType} {variableName} = new {foundCSharpType}");
 		builder.OpenBrace();
 		
-		if (structName == "Color")
+		if (structName == "Color" && fieldInitializers.Count >= 3)
 		{
 			(fieldInitializers[0], fieldInitializers[2]) = (fieldInitializers[2], fieldInitializers[0]);
 		}

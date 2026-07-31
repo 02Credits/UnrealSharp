@@ -11,8 +11,24 @@ public static class TaskManager
 
 	public static void StartTask(UhtExportTaskDelegate action)
 	{
-		Task? task = GeneratorStatics.Factory.CreateTask(action);
-		
+		// UHT catches whatever escapes an export task and reports a bare ICE with no stack trace,
+		// so log the real exception before letting it propagate.
+		UhtExportTaskDelegate wrapped = factory =>
+		{
+			try
+			{
+				action(factory);
+			}
+			catch (System.Exception ex)
+			{
+				ConsoleUtilities.Log("Exception in glue export task:");
+				ConsoleUtilities.Log(ex.ToString());
+				throw;
+			}
+		};
+
+		Task? task = GeneratorStatics.Factory.CreateTask(wrapped);
+
 		if (task == null)
 		{
 			// Task execution was done synchronously
