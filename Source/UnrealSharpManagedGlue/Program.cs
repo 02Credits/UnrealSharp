@@ -49,12 +49,23 @@ public static class Program
         
         GeneratorStatics.Initialize(factory);
         ExportBindings();
-        
-        FileExporter.CleanOldExportedFiles();
-        BuildUtilities.BuildBindings();
-        
-        ModuleFactory.SyncModuleProjects();
-        BuildUtilities.GenerateUserSolution();
+
+        // UHT swallows the stack trace of anything that escapes here and reports a bare ICE, so
+        // surface it ourselves before rethrowing.
+        try
+        {
+            FileExporter.CleanOldExportedFiles();
+            BuildUtilities.BuildBindings();
+
+            ModuleFactory.SyncModuleProjects();
+            BuildUtilities.GenerateUserSolution();
+        }
+        catch (Exception ex)
+        {
+            ConsoleUtilities.Log("Critical failure after bindings export:");
+            ConsoleUtilities.Log(ex.ToString());
+            throw;
+        }
     }
 
     private static void ExportBindings()
