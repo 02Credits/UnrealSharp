@@ -217,6 +217,8 @@ public static class ClassExporter
 
         foreach (ExtensionMethod extensionMethod in extensionMethods)
         {
+            WarnIfSelfParameterIsOutOnly(extensionMethod);
+
             FunctionExporter exporter = new FunctionExporter(extensionMethod);
             exporter.Initialize(OverloadMode.AllowOverloads, EFunctionProtectionMode.UseUFunctionProtection);
             exporter.ExportExtensionMethodOverloads(stringBuilder);
@@ -226,5 +228,21 @@ public static class ClassExporter
         stringBuilder.CloseBrace();
 
         stringBuilder.EndNamespace();
+    }
+
+    private static void WarnIfSelfParameterIsOutOnly(ExtensionMethod extensionMethod)
+    {
+        UhtProperty self = extensionMethod.SelfParameter;
+
+        if (!self.HasAnyFlags(EPropertyFlags.OutParm)
+            || self.HasAnyFlags(EPropertyFlags.ConstParm | EPropertyFlags.ReferenceParm))
+        {
+            return;
+        }
+
+        ConsoleUtilities.Log(
+            $"WARNING: {extensionMethod.Class.SourceName}::{extensionMethod.Function.SourceName} takes its first " +
+            $"parameter '{self.SourceName}' as a non-const reference, so the extension method generated for it " +
+            "silently discards any change made to it. Pass it by value or by const reference instead.");
     }
 }
