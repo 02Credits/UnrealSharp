@@ -21,6 +21,10 @@ namespace FCSHotReloadUtilities
 	inline bool IsCSharpFile(const FString& Path) { return Path.EndsWith(TEXT(".cs")); }
 	inline bool IsSkippablePath(const FString& Path) { return Path.Contains(TEXT("/obj/")) || Path.Contains(TEXT("/bin/")) || !IsCSharpFile(Path); }
 	
+	bool IsRuntimeGluePath(const FString& Path);
+
+	void ReportHotReloadError(const FString& Context, const FString& ErrorMessage);
+
 	bool HasFileBeenDirtied(const TArray<FCSChangedFile>& DirtiedFiles, const FString& FilePath, FFileChangeData::EFileChangeAction Action);
 
 	void CollectDirtiedFiles(const TArray<FFileChangeData>& ChangedFiles, TArray<FCSChangedFile>& OutDirtied);
