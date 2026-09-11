@@ -14,6 +14,9 @@
 #include "Utilities/CSAssemblyUtilities.h"
 #include "Utilities/CSClassUtilities.h"
 #include "CSPathsUtilities.h"
+#include "Framework/Docking/TabManager.h"
+#include "Framework/Notifications/NotificationManager.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 bool FCSHotReloadUtilities::IsRuntimeGluePath(const FString& Path)
 {
@@ -21,6 +24,26 @@ bool FCSHotReloadUtilities::IsRuntimeGluePath(const FString& Path)
 	FPaths::NormalizeDirectoryName(NormalizedPath);
 
 	return NormalizedPath.StartsWith(UnrealSharp::Paths::GetRuntimeGlueDirectory() + TEXT("/"), ESearchCase::IgnoreCase);
+}
+
+void FCSHotReloadUtilities::ReportHotReloadError(const FString& Context, const FString& ErrorMessage)
+{
+	UE_LOG(LogUnrealSharpEditor, Error, TEXT("%s:\n%s"), *Context, *ErrorMessage);
+
+	FNotificationInfo Info(FText::FromString(Context));
+	Info.SubText = FText::FromString(ErrorMessage);
+	Info.ExpireDuration = 8.0f;
+	Info.HyperlinkText = NSLOCTEXT("UnrealSharp", "ShowOutputLog", "Show Output Log");
+	Info.Hyperlink = FSimpleDelegate::CreateLambda([]()
+	{
+		FGlobalTabmanager::Get()->TryInvokeTab(FName(TEXT("OutputLog")));
+	});
+
+	TSharedPtr<SNotificationItem> Notification = FSlateNotificationManager::Get().AddNotification(Info);
+	if (Notification.IsValid())
+	{
+		Notification->SetCompletionState(SNotificationItem::CS_Fail);
+	}
 }
 
 bool FCSHotReloadUtilities::HasFileBeenDirtied(const TArray<FCSChangedFile>& DirtiedFiles, const FString& FilePath, FFileChangeData::EFileChangeAction Action)

@@ -23,6 +23,8 @@ namespace FCSHotReloadUtilities
 	
 	bool IsRuntimeGluePath(const FString& Path);
 
+	void ReportHotReloadError(const FString& Context, const FString& ErrorMessage);
+
 	bool HasFileBeenDirtied(const TArray<FCSChangedFile>& DirtiedFiles, const FString& FilePath, FFileChangeData::EFileChangeAction Action);
 
 	void CollectDirtiedFiles(const TArray<FFileChangeData>& ChangedFiles, TArray<FCSChangedFile>& OutDirtied);
