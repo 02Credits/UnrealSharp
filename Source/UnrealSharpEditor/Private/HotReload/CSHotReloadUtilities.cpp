@@ -13,6 +13,15 @@
 #include "Types/CSScriptStruct.h"
 #include "Utilities/CSAssemblyUtilities.h"
 #include "Utilities/CSClassUtilities.h"
+#include "CSPathsUtilities.h"
+
+bool FCSHotReloadUtilities::IsRuntimeGluePath(const FString& Path)
+{
+	FString NormalizedPath = Path;
+	FPaths::NormalizeDirectoryName(NormalizedPath);
+
+	return NormalizedPath.StartsWith(UnrealSharp::Paths::GetRuntimeGlueDirectory() + TEXT("/"), ESearchCase::IgnoreCase);
+}
 
 bool FCSHotReloadUtilities::HasFileBeenDirtied(const TArray<FCSChangedFile>& DirtiedFiles, const FString& FilePath, FFileChangeData::EFileChangeAction Action)
 {
@@ -337,9 +346,27 @@ void FCSHotReloadUtilities::GetChangedCSharpFiles(const TArray<FFileChangeData>&
 	}
 }
 
-bool FCSHotReloadUtilities::ShouldDeferHotReloadRequest(const UCSManagedAssembly* ModifiedAssembly)
+bool FCSHotReloadUtilities::ShouldDeferHotReloadRequest(const UCSManagedAssembly* ModifiedAssembly, const TArray<FCSChangedFile>& DirtiedFiles)
 {
 	if (FCSAssemblyUtilities::IsRuntimeGlueAssembly(ModifiedAssembly))
+	{
+		return true;
+	}
+
+	// Glue lands in the owning assembly when it's a shared project, so defer on path instead of assembly name.
+	bool bGlueOnly = !DirtiedFiles.IsEmpty();
+	for (const FCSChangedFile& DirtiedFile : DirtiedFiles)
+	{
+		if (IsRuntimeGluePath(DirtiedFile.FilePath))
+		{
+			continue;
+		}
+
+		bGlueOnly = false;
+		break;
+	}
+
+	if (bGlueOnly)
 	{
 		return true;
 	}

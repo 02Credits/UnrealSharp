@@ -11,6 +11,7 @@ namespace UnrealSharp::Paths
 	UNREALSHARPUTILITIES_API FString GetUnrealSharpMetadataPath();
 	UNREALSHARPUTILITIES_API FString GetGeneratedClassesDirectory();
 	UNREALSHARPUTILITIES_API const FString& GetScriptFolderDirectory();
+	UNREALSHARPUTILITIES_API const FString& GetRuntimeGlueDirectory();
 	UNREALSHARPUTILITIES_API const FString& GetPluginsDirectory();
 	UNREALSHARPUTILITIES_API FString GetPathToManagedSolution();
 	

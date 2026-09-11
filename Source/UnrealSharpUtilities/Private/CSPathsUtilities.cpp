@@ -4,6 +4,7 @@
 #include "CSDotnetUtilties.h"
 #include "CSInstallationUtilities.h"
 #include "CSProjectUtilities.h"
+#include "Misc/App.h"
 #include "Interfaces/IPluginManager.h"
 #include "Logging/StructuredLog.h"
 
@@ -61,6 +62,13 @@ const FString& UnrealSharp::Paths::GetScriptFolderDirectory()
 {
     static FString ScriptFolderDirectory = FPaths::Combine(FPaths::ProjectDir(), GlobalSettings::Common::GetScriptDirectoryName());
     return ScriptFolderDirectory;
+}
+
+const FString& UnrealSharp::Paths::GetRuntimeGlueDirectory()
+{
+    static FString RuntimeGlueDirectory = FPaths::ConvertRelativePathToFull(
+        GetScriptFolderDirectory() / FString::Printf(TEXT("%s.RuntimeGlue"), FApp::GetProjectName()));
+    return RuntimeGlueDirectory;
 }
 
 const FString& UnrealSharp::Paths::GetPluginsDirectory()

@@ -21,6 +21,8 @@ namespace FCSHotReloadUtilities
 	inline bool IsCSharpFile(const FString& Path) { return Path.EndsWith(TEXT(".cs")); }
 	inline bool IsSkippablePath(const FString& Path) { return Path.Contains(TEXT("/obj/")) || Path.Contains(TEXT("/bin/")) || !IsCSharpFile(Path); }
 	
+	bool IsRuntimeGluePath(const FString& Path);
+
 	bool HasFileBeenDirtied(const TArray<FCSChangedFile>& DirtiedFiles, const FString& FilePath, FFileChangeData::EFileChangeAction Action);
 
 	void CollectDirtiedFiles(const TArray<FFileChangeData>& ChangedFiles, TArray<FCSChangedFile>& OutDirtied);
@@ -39,6 +41,6 @@ namespace FCSHotReloadUtilities
 	
 	void GetChangedCSharpFiles(const TArray<FFileChangeData>& ChangedFiles, TArray<FFileChangeData>& OutFilteredFiles);
 	
-	bool ShouldDeferHotReloadRequest(const UCSManagedAssembly* ModifiedAssembly);
+	bool ShouldDeferHotReloadRequest(const UCSManagedAssembly* ModifiedAssembly, const TArray<FCSChangedFile>& DirtiedFiles);
 	bool ShouldHotReloadOnEditorFocus(const UCSHotReloadSubsystem* HotReloadSubsystem);
 };

@@ -374,7 +374,7 @@ void UCSHotReloadSubsystem::HandleScriptFileChanges(const TArray<FFileChangeData
 		PendingModifiedAssemblies.Add(ModifiedAssembly);
 	}
 	
-	if (FCSHotReloadUtilities::ShouldDeferHotReloadRequest(ModifiedAssembly))
+	if (FCSHotReloadUtilities::ShouldDeferHotReloadRequest(ModifiedAssembly, DirtiedFiles))
 	{
 		UE_LOGFMT(LogUnrealSharpEditor, Verbose, "Deferring hot reload request for assembly {0}.", *ModifiedAssembly->GetName());
 		return;

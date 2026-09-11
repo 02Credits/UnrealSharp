@@ -45,7 +45,7 @@ void FUnrealSharpRuntimeGlueModule::ForceRefreshRuntimeGlue()
 
 FString FUnrealSharpRuntimeGlueModule::GetGlueFolder()
 {
-	return FPaths::Combine(UnrealSharp::Paths::GetScriptFolderDirectory(), GetRuntimeGlueName());
+	return UnrealSharp::Paths::GetRuntimeGlueDirectory();
 }
 
 void FUnrealSharpRuntimeGlueModule::InitializeRuntimeGlueGenerators()

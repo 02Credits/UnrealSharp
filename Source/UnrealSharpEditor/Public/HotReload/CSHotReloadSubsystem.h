@@ -45,6 +45,8 @@ public:
 	
 	UNREALSHARPEDITOR_API void PerformHotReload();
 	
+	UNREALSHARPEDITOR_API void AddDirectoryToWatch(const FString& Directory, FName ProjectName);
+	
 	void PauseHotReload(const FString& Reason = FString());
 	void ResumeHotReload();
 	
@@ -53,8 +55,6 @@ public:
 	void DirtyUnrealType(const char* AssemblyName, const char* Namespace, const char* TypeName, ECSTypeStructuralFlags Flags);
 
 private:
-	
-	void AddDirectoryToWatch(const FString& Directory, FName ProjectName);
 	
 	void HandleScriptFileChanges(const TArray<FFileChangeData>& ChangedFiles, FName ProjectName);
 
