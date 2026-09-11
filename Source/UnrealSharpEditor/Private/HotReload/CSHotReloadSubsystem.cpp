@@ -129,7 +129,7 @@ void UCSHotReloadSubsystem::PerformHotReload()
 	if (!FCSHotReloadUtilities::RecompileDirtyProjects(AssembliesSortedByDependencies, ExceptionMessage))
 	{
 		CurrentHotReloadStatus = FailedToCompile;
-		UnrealSharp::Dialogs::ShowError(FText::FromString(ExceptionMessage), LOCTEXT("CompilationFailedTitle", "C# Compilation Failed"));
+		FCSHotReloadUtilities::ReportHotReloadError(TEXT("C# Compilation Failed"), ExceptionMessage);
 		return;
 	}
 	
@@ -343,7 +343,7 @@ void UCSHotReloadSubsystem::HandleScriptFileChanges(const TArray<FFileChangeData
 	FString ExceptionMessage;
 	if (!FCSHotReloadUtilities::ApplyDirtiedFiles(ProjectName.ToString(), DirtiedFiles, ExceptionMessage))
 	{
-		UnrealSharp::Dialogs::ShowError(FText::FromString(ExceptionMessage), LOCTEXT("HotReloadErrorTitle", "C# Hot Reload Error"));
+		FCSHotReloadUtilities::ReportHotReloadError(TEXT("C# Hot Reload Error"), ExceptionMessage);
 		return;
 	}
 	
