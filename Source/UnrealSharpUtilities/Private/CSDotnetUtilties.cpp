@@ -247,7 +247,31 @@ bool UnrealSharp::DotNetUtilities::BuildUserSolution()
 		return true;
 	}
 
-	return Build::BuildUserSolution(Dialogs::MakeOkCancelDialogOnError());
+	const bool bHasPreviousBuild = FPaths::FileExists(Paths::GetUserAssemblyDirectory() / TEXT("UserCode.LoadOrder.json"));
+	if (!bHasPreviousBuild) {
+		return Build::BuildUserSolution(Dialogs::MakeOkCancelDialogOnError());
+	}
+
+	bool bUsePreviousBuild = false;
+	const bool bBuilt = Build::BuildUserSolution(FCSCommandError::CreateLambda(
+		[&bUsePreviousBuild](const FString& ErrorOutput)
+		{
+			const FString Message = ErrorOutput + TEXT("\n\nTry Again to rebuild, Continue to start with the last successful build, or Cancel to exit.");
+			switch (FMessageDialog::Open(EAppMsgType::CancelRetryContinue, FText::FromString(Message)))
+			{
+				case EAppReturnType::Continue:
+					bUsePreviousBuild = true;
+					UE_LOGFMT(LogUnrealSharpUtilities, Warning, "C# build failed; starting with the last successful build.");
+					break;
+				case EAppReturnType::Cancel:
+				    FPlatformMisc::RequestExit(true);
+					break;
+				default:
+					break;
+			}
+		}));
+
+	return bBuilt || bUsePreviousBuild;
 }
 #endif
 
